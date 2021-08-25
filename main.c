@@ -91,11 +91,32 @@ int alturaDir(FolhaAVL *no){
 int alturaEsq(FolhaAVL *no){
     return (no==NULL)? 0:1+alturaEsq(no->Esq);
 }
+void calculaFatorBalanco(FolhaAVL *no){
+    int altDir,altEsq;
+    altDir=alturaDir(no);
+    altEsq=alturaEsq(no);
+    no->FatorBalanco=altDir-altEsq;
+}
+/* No mais uma arvore AVL é uma arvore binaria e realiza as mesmas operações
+ */
+
+FolhaAVL criaRegistro(int info){
+    FolhaAVL novo;
+    novo.dado=info;
+    novo.FatorBalanco=0;
+    novo.Dir=NULL;
+    novo.Esq=NULL;
+    return novo;
+}
+
 int main()
 {
-    int *p,A,*ponteiroA=&A;
-    A=1;
-    *p=9;
-    printf("&A=%d A=%d p=%d *p=%d\n",ponteiroA,A,p,*p);
+    int valorAleatorio;
+    FolhaAVL registro;
+    for(int i=0;i<10;i++){
+        valorAleatorio=rand()%100;
+        registro=criaRegistro(valorAleatorio);
+        printf("random=%d registro.dado=%d reg.FB=%d\n",valorAleatorio,registro.dado,registro.FatorBalanco);
+    }
     return 0;
 }

@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include<locale.h>
+
 //#include "CUnit/Basic.h"
 
 /**
@@ -65,6 +67,8 @@ void rotacao_Direita(FolhaAVL *no){
     temporario=no->Dir;
     q->Dir=no;
     no->Esq=temporario;
+    q->FatorBalanco=0;
+    temporario->FatorBalanco=0;
     no=q;
 }
 void rotacao_Esquerda(FolhaAVL *no){
@@ -73,6 +77,8 @@ void rotacao_Esquerda(FolhaAVL *no){
     temporario=q->Esq;
     q->Esq=no;
     no->Dir=temporario;
+    q->FatorBalanco=0;
+    temporario->FatorBalanco=0;
     no=q;
 }
 void rotacao_Esq_Dir(FolhaAVL *no){
@@ -98,25 +104,132 @@ void calculaFatorBalanco(FolhaAVL *no){
     no->FatorBalanco=altDir-altEsq;
 }
 /* No mais uma arvore AVL é uma arvore binaria e realiza as mesmas operações
+ * porém com algumas modificações.
  */
 
+ //criaRegistro: cria e armazena um tipo FolhaAVL a partir de um valor inteiro.
 FolhaAVL criaRegistro(int info){
     FolhaAVL novo;
     novo.dado=info;
     novo.FatorBalanco=0;
     novo.Dir=NULL;
     novo.Esq=NULL;
+
     return novo;
 }
-
+//insere: busca uma posição e insere uma nova FolhaAVL a uma subarvore.
+//inserir: Cria um novo registro e o insere na arvore.
+int inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
+    FolhaAVL *pRaiz=*pPonteiroParaRaiz;
+    printf("começou \nnumero a inserir:%d\npRaiz=%x\n",numero,pRaiz);
+    if(pRaiz==NULL)
+    {
+        pRaiz=(FolhaAVL *)malloc(sizeof(FolhaAVL));printf("pRaiz==NULL\n");
+        if(pRaiz==NULL)
+            return 0;// erro de insercao, não tem memória.
+        else
+        {
+            (pRaiz)->dado=numero;printf("inserido numero:%d em pRaiz:%x\n",(pRaiz)->dado,pRaiz);
+            (pRaiz)->Dir=NULL;
+            (pRaiz)->Esq=NULL;
+            (pRaiz)->FatorBalanco=0;
+            *cresceu=1;
+            return 1;//sucesso inserção
+        }
+    }else if(numero<=(pRaiz)->dado){
+        printf("numero menor \n");
+        if(inserir(&(pRaiz)->Esq,numero,cresceu)){
+            if(*cresceu){//caso tenha conseguido inserir a esquerda.
+                switch((*pRaiz).FatorBalanco){
+                    case -1://desbalanceado a esquerda
+                        if((pRaiz)->Esq->FatorBalanco==-1)
+                            rotacao_Direita(pRaiz);
+                        else rotacao_Esq_Dir(pRaiz);//Sinais trocados
+                        break;
+                    case 0:
+                        (pRaiz)->FatorBalanco=-1;
+                        *cresceu=1;
+                        break;
+                    case 1://direita maior
+                        (pRaiz)->FatorBalanco=0;
+                        *cresceu=0;
+                        break;
+                }//Fimswitch
+            }//FimIF(cresceu)
+            return 1;
+        }
+        else return 0;
+    }else{
+        if(inserir(&(pRaiz)->Dir,numero,cresceu)){
+            if(*cresceu){//inseriu a direita, agora verifica balanco
+                switch ((pRaiz)->FatorBalanco){
+                    case -1:
+                        (pRaiz)->FatorBalanco=0;
+                        *cresceu=0;
+                        break;
+                    case 0:
+                        (pRaiz)->FatorBalanco=1;*cresceu=1;
+                        break;
+                    case 1:
+                        if((pRaiz)->Dir->FatorBalanco==1){
+                            rotacao_Esquerda(pRaiz);
+                        }else rotacao_Dir_Esq(pRaiz);*cresceu=0;
+                        break;
+                }//FIMSWITCH
+            }
+            return 1;
+        }//FIMIF(insereDireita)
+        else return 0;// nao conseguiu inserir
+    }
+}//FimInsere
+/*
+ * Existem também as famosas funções recursivas para percorrimento da arvore em diversas ordens
+*/
+void visita(FolhaAVL *no){
+    printf("No: %d\n",no->dado);
+}
+void emOrdem(FolhaAVL *pNo) {
+     if(pNo != NULL) {
+         emOrdem(pNo->Esq);
+         visita(pNo);
+         emOrdem(pNo->Dir);
+     }
+ }
+ void preOrdem(FolhaAVL *pNo){
+     if(pNo != NULL){
+         visita(pNo);
+         preOrdem(pNo->Esq);
+         preOrdem(pNo->Dir);
+     }
+ }
+ void posOrdem(FolhaAVL *pNo){
+     if(pNo != NULL){
+         posOrdem(pNo->Esq);
+         posOrdem(pNo->Dir);
+         visita(pNo);
+     }
+ }
 int main()
 {
-    int valorAleatorio;
-    FolhaAVL registro;
-    for(int i=0;i<10;i++){
+    setlocale(LC_ALL,"ptb");//Traduz os caracteres para portugues.
+
+    int valorAleatorio,total=60;
+    FolhaAVL *RaizArvore,**ponteiroParaRaiz;
+    RaizArvore=NULL;
+    ponteiroParaRaiz=&RaizArvore;
+    int cresceu=0;
+    printf("RaizArvore:%x &RaizArvore:%x ponteiroParaRaiz:%x\n",RaizArvore,&RaizArvore,ponteiroParaRaiz);
+
+
+    //if(RaizArvore==NULL){printf("comparou (RaizArvore==NULL)\n");}
+    for(int i=0;i<total;i++){
         valorAleatorio=rand()%100;
-        registro=criaRegistro(valorAleatorio);
-        printf("random=%d registro.dado=%d reg.FB=%d\n",valorAleatorio,registro.dado,registro.FatorBalanco);
+        //printf("inseriu valor: %d\n",valorAleatorio);
+        inserir(ponteiroParaRaiz,valorAleatorio,&cresceu);
+        printf("\nponteiroParaRaiz:%x RaizArvore:%x\n",ponteiroParaRaiz,RaizArvore);
+        printf("\n=============================================\n");
     }
+    emOrdem(RaizArvore);
+
     return 0;
 }

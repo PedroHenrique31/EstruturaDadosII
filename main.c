@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include<locale.h>
+#define TRUE 1
+#define FALSE 0
 
 //#include "CUnit/Basic.h"
 
@@ -62,28 +64,31 @@ typedef struct FolhaAVL{
  *      4-rotação dupla a esquerda;(operação composta de 1 e 2).
 */
 void rotacao_Direita(FolhaAVL *no){
+    printf("\t\trotacao direita\n\tno->dado:%d",no->dado);
     FolhaAVL *q,*temporario;
     q=no->Esq;
     temporario=no->Dir;
     q->Dir=no;
     no->Esq=temporario;
     q->FatorBalanco=0;
-    temporario->FatorBalanco=0;
+    //temporario->FatorBalanco=0;
     no=q;
+    printf("\t fim rotacao direita\tno->dado:%d no->esq:%x no->dir:%d\n",no->dado,no->Esq,no->Dir->dado);
 }
 void rotacao_Esquerda(FolhaAVL *no){
-    FolhaAVL *q,*temporario;
-    q=no->Dir;
-    temporario=q->Esq;
+    printf("ROTACAO ESQUERDA COM NO:%x cujo valor eh %d e direita eh %d\n",no,no->dado,no->Dir->dado);
+    FolhaAVL *q,*temporario;printf("temporario:%x\n",temporario);
+    q=no->Dir;printf("DIREITA de %d é %d e esquerda de 24 é %x e o valor é nulo\n",no->dado,q->dado,q->Esq);
+    temporario=q->Esq;printf("esquerda de %d eh %x\n",q->dado,temporario);
     q->Esq=no;
     no->Dir=temporario;
-    q->FatorBalanco=0;
-    temporario->FatorBalanco=0;
-    no=q;
+    q->FatorBalanco=0;//printf("q->fb=0\n");printf("temporario:%x valor:\n",temporario,temporario->dado);
+    //temporario->FatorBalanco=0;printf("temporario->fb=0\n");
+    no=q;printf("no=q\n");
 }
 void rotacao_Esq_Dir(FolhaAVL *no){
-    rotacao_Esquerda(no->Esq);
-    rotacao_Direita(no);
+    rotacao_Esquerda(no->Esq);printf("ROTACAo esq\n");printf("\tvai paraROTACAO DIREITA no:%x cujo valor é %d\n",no,no->dado);
+    rotacao_Direita(no);printf("ROTACAO DIREITA\n");
 }
 void rotacao_Dir_Esq(FolhaAVL *no){
     rotacao_Direita(no->Dir);
@@ -121,7 +126,7 @@ FolhaAVL criaRegistro(int info){
 //inserir: Cria um novo registro e o insere na arvore.
 int inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
     FolhaAVL *pRaiz=*pPonteiroParaRaiz;
-    printf("começou \nnumero a inserir:%d\npRaiz=%x\n",numero,pRaiz);
+    printf("começou \nnumero a inserir:%d \npRaiz=%x\n",numero,pRaiz);
     if(pRaiz==NULL)
     {
         pRaiz=(FolhaAVL *)malloc(sizeof(FolhaAVL));printf("pRaiz==NULL\n");
@@ -134,47 +139,55 @@ int inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
             (pRaiz)->Esq=NULL;
             (pRaiz)->FatorBalanco=0;
             *pPonteiroParaRaiz=pRaiz;
-            *cresceu=1;
-            return 1;//sucesso inserção
+            *cresceu=TRUE;
+            return TRUE;//sucesso inserção
         }
     }else if(numero<=(pRaiz)->dado){
+        printf("%d comparado a raiz %d\n",numero,pRaiz->dado);
         //printf("numero menor \n");
-        if(inserir(&(pRaiz)->Esq,numero,cresceu)){
+        if(inserir(&(pRaiz)->Esq,numero,cresceu)){printf("conseguiu inserir %d cresceu:%d\n",numero,*cresceu);
             if(*cresceu){//caso tenha conseguido inserir a esquerda.
+                    printf("AVALIA BALANCO ESQUERDA\n");
                 switch((*pRaiz).FatorBalanco){
                     case -1://desbalanceado a esquerda
-                        if((pRaiz)->Esq->FatorBalanco==-1)
-                            rotacao_Direita(pRaiz);
-                        else rotacao_Esq_Dir(pRaiz);//Sinais trocados
+                        printf("case -1\n");
+                        if((pRaiz)->Esq->FatorBalanco==-1){
+                            printf("ROTACAO DIREITA\n");rotacao_Direita(pRaiz);
+                        }else printf("ROTACAO ESQ DIREITA\n");rotacao_Esq_Dir(pRaiz);//Sinais trocados
                         break;
                     case 0:
+                        printf("case 0 FB=-1\n");
                         (pRaiz)->FatorBalanco=-1;
-                        *cresceu=1;
+                        *cresceu=TRUE;printf("FATOR BALANCO:0 apenas colocou -1 em Raiz\n");
                         break;
                     case 1://direita maior
-                        (pRaiz)->FatorBalanco=0;
-                        *cresceu=0;
+                        printf("CASE 1\n");
+                        (pRaiz)->FatorBalanco=0;printf("(pRaiz)->info:%d FatorBalanco:%d\n",(pRaiz)->dado,(pRaiz)->FatorBalanco);
+                        *cresceu=FALSE;
                         break;
                 }//Fimswitch
             }//FimIF(cresceu)
-            return 1;
+            return TRUE;
         }
-        else return 0;
+        else return FALSE;
     }else{
-        if(inserir(&(pRaiz)->Dir,numero,cresceu)){
+        printf("%d comparado a raiz %d\n",numero,pRaiz->dado);
+        if(inserir(&(pRaiz)->Dir,numero,cresceu)){printf("conseguiu inserir %d cresceu:%d\n",numero,*cresceu);
             if(*cresceu){//inseriu a direita, agora verifica balanco
+                    printf("AVALIA BALANCO DIREITA,pRaiz->dado:%d\n",pRaiz->dado);
                 switch ((pRaiz)->FatorBalanco){
                     case -1:
                         (pRaiz)->FatorBalanco=0;
-                        *cresceu=0;
+                        *cresceu=FALSE;
+                        printf("case -1 fb=0\n");
                         break;
                     case 0:
-                        (pRaiz)->FatorBalanco=1;*cresceu=1;
+                        (pRaiz)->FatorBalanco=1;*cresceu=TRUE;printf("case 0: acrescenta 1\n");
                         break;
                     case 1:
                         if((pRaiz)->Dir->FatorBalanco==1){
-                            rotacao_Esquerda(pRaiz);
-                        }else rotacao_Dir_Esq(pRaiz);*cresceu=0;
+                            rotacao_Esquerda(pRaiz);printf("rodou Esquerda\n");
+                        }else rotacao_Dir_Esq(pRaiz);*cresceu=FALSE;
                         break;
                 }//FIMSWITCH
             }
@@ -224,10 +237,11 @@ int main()
 
     //if(RaizArvore==NULL){printf("comparou (RaizArvore==NULL)\n");}
     for(int i=0;i<total;i++){
+        printf("interação:%d\n",i);
         valorAleatorio=rand()%100;
         //printf("inseriu valor: %d\n",valorAleatorio);
         inserir(ponteiroParaRaiz,valorAleatorio,&cresceu);
-        printf("\nponteiroParaRaiz:%x RaizArvore:%x\n",ponteiroParaRaiz,RaizArvore);
+        printf("\nponteiroParaRaiz:%x RaizArvore:%x RaizArvore->FB:%d\n",ponteiroParaRaiz,RaizArvore,RaizArvore->FatorBalanco);
         printf("\n=============================================\n");
     }
     emOrdem(RaizArvore);

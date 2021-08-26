@@ -63,36 +63,66 @@ typedef struct FolhaAVL{
  *      3-rotação dupla a direita;(operação composta de 2 e 1);
  *      4-rotação dupla a esquerda;(operação composta de 1 e 2).
 */
-void rotacao_Direita(FolhaAVL *no){
-    printf("\t\trotacao direita\n\tno->dado:%d",no->dado);
+FolhaAVL* rotacao_Direita(FolhaAVL *no){
+    printf("\t\tROTACAO DIREITA\n\tno->dado:%d no->esq->dado:%d no->dir:%x",no->dado,no->Esq->dado,no->Dir);
     FolhaAVL *q,*temporario;
-    q=no->Esq;
-    temporario=no->Dir;
-    q->Dir=no;
-    no->Esq=temporario;
-    q->FatorBalanco=0;
-    //temporario->FatorBalanco=0;
-    no=q;
-    printf("\t fim rotacao direita\tno->dado:%d no->esq:%x no->dir:%d\n",no->dado,no->Esq,no->Dir->dado);
+    temporario=no;//copia o valor de no para mexer nele
+    q=no->Esq;//q aponta para esquerda de nó
+    temporario->Esq=q->Dir;// esquerda de nó aponta para direita de q (pois o valor no>q.DIR>q)
+    q->Dir=temporario;//direita de q aponta para no (pois valor no>q)
+    q->FatorBalanco=0;//zera o FB de q
+    temporario->FatorBalanco=0;//zera o fb de no
+    no=q;//troca no de lugar para q
+    //printf("\t fim rotacao direita\tno->dado:%d no->esq:%d no->dir:%d\n",no->dado,no->Esq->dado,no->Dir->dado);
+    return no;
 }
-void rotacao_Esquerda(FolhaAVL *no){
-    printf("ROTACAO ESQUERDA COM NO:%x cujo valor eh %d e direita eh %d\n",no,no->dado,no->Dir->dado);
-    FolhaAVL *q,*temporario;printf("temporario:%x\n",temporario);
-    q=no->Dir;printf("DIREITA de %d é %d e esquerda de 24 é %x e o valor é nulo\n",no->dado,q->dado,q->Esq);
-    temporario=q->Esq;printf("esquerda de %d eh %x\n",q->dado,temporario);
-    q->Esq=no;
-    no->Dir=temporario;
-    q->FatorBalanco=0;//printf("q->fb=0\n");printf("temporario:%x valor:\n",temporario,temporario->dado);
-    //temporario->FatorBalanco=0;printf("temporario->fb=0\n");
-    no=q;printf("no=q\n");
+void rotacao_Esquerda(FolhaAVL **no){
+    FolhaAVL *a,*b;
+    a=*no;//salva o valor de no
+    b=a->Dir;//b aponta para direita de no (logo valor b>no)
+    a->Dir=b->Esq;//no aponta para esquerda de b (pois valor b->esq<b>no)
+    b->Esq=a;//esquerda de b aponta no (pois b->esq<b>no)
+    a->FatorBalanco=0;
+    b->FatorBalanco=0;
+    *no=b;//troca no de lugar para b
 }
-void rotacao_Esq_Dir(FolhaAVL *no){
-    rotacao_Esquerda(no->Esq);printf("ROTACAo esq\n");printf("\tvai paraROTACAO DIREITA no:%x cujo valor é %d\n",no,no->dado);
-    rotacao_Direita(no);printf("ROTACAO DIREITA\n");
+FolhaAVL* rotacao_Esq_Dir(FolhaAVL *no){
+    printf("\t\t\t\t <<<< ROTACAO ESQUERDA-DIREITA >>>>\n");
+    int FatorBalancoNo=no->FatorBalanco;
+    rotacao_Esquerda(&no->Esq);
+    no=rotacao_Direita(no);
+
+    FolhaAVL *a=no->Esq,*b=no->Dir;
+    switch(FatorBalancoNo){
+        case -1:
+            a->FatorBalanco=0;b->FatorBalanco=1;break;
+        case 0:
+            a->FatorBalanco=0;b->FatorBalanco=0;break;
+        case 1:
+            a->FatorBalanco=-1;b->FatorBalanco=0;break;
+    }
+    //no->FatorBalanco=0;//ja foi iterado
+    printf("no->FB antes:%d depois:%d\n\tno.esq.dado:%d no.esq.fatorbalanço:%d\n",no->FatorBalanco,FatorBalancoNo,no->Esq->dado,no->Esq->FatorBalanco);
+    return no;
 }
-void rotacao_Dir_Esq(FolhaAVL *no){
-    rotacao_Direita(no->Dir);
-    rotacao_Esquerda(no);
+void rotacao_Dir_Esq(FolhaAVL **no){//essa função retorna void por isso devo passar um **no para trabalhar mas como nao foi chamada...
+    printf("\t\t\t\t <<<< Rotação Direita Esquerda >>>>\n");
+    FolhaAVL *noAtual=*no;printf("passou a linha 110 noAtual:%d *no:%x *no->dado: tem que ser 53\n",noAtual->dado,*no);
+    int FatorBalancoNo=noAtual->FatorBalanco;printf("passou a linha 111 noAtual->fb:%d\n",noAtual->FatorBalanco);
+    noAtual->Dir=rotacao_Direita(noAtual->Dir);printf("passou a linha 112\n");
+    rotacao_Esquerda(&noAtual);printf("passou a linha 113\n");
+
+    FolhaAVL *a=noAtual->Esq,*b=noAtual->Dir;
+    switch(FatorBalancoNo){
+        case -1:
+            a->FatorBalanco=0;b->FatorBalanco=1;break;
+        case 0:
+            a->FatorBalanco=0;b->FatorBalanco=0;break;
+        case 1:
+            a->FatorBalanco=-1;b->FatorBalanco=0;break;
+    }
+    //no->FatorBalanco=0;//ja iterado
+    *no=noAtual;
 }
 /* Outra funcionalidade extra é a de calcular a altura de um nó para mais tarde calcular o Fator de balanco*/
 
@@ -124,7 +154,7 @@ FolhaAVL criaRegistro(int info){
 }
 //insere: busca uma posição e insere uma nova FolhaAVL a uma subarvore.
 //inserir: Cria um novo registro e o insere na arvore.
-int inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
+FolhaAVL* inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
     FolhaAVL *pRaiz=*pPonteiroParaRaiz;
     printf("começou \nnumero a inserir:%d \npRaiz=%x\n",numero,pRaiz);
     if(pRaiz==NULL)
@@ -140,20 +170,23 @@ int inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
             (pRaiz)->FatorBalanco=0;
             *pPonteiroParaRaiz=pRaiz;
             *cresceu=TRUE;
-            return TRUE;//sucesso inserção
+            return pRaiz;//sucesso inserção
         }
     }else if(numero<=(pRaiz)->dado){
         printf("%d comparado a raiz %d\n",numero,pRaiz->dado);
         //printf("numero menor \n");
-        if(inserir(&(pRaiz)->Esq,numero,cresceu)){printf("conseguiu inserir %d cresceu:%d\n",numero,*cresceu);
+        if(pRaiz->Esq=inserir(&(pRaiz)->Esq,numero,cresceu)){printf("chamada:%d esquerda:%d conseguiu inserir %d cresceu:%d\n",pRaiz->dado,
+                                                         pRaiz->Esq->dado,numero,*cresceu);
             if(*cresceu){//caso tenha conseguido inserir a esquerda.
-                    printf("AVALIA BALANCO ESQUERDA\n");
+                    printf("AVALIA BALANCO ESQUERDA,no->dado:%d\n",pRaiz->dado);
                 switch((*pRaiz).FatorBalanco){
                     case -1://desbalanceado a esquerda
                         printf("case -1\n");
                         if((pRaiz)->Esq->FatorBalanco==-1){
-                            printf("ROTACAO DIREITA\n");rotacao_Direita(pRaiz);
-                        }else printf("ROTACAO ESQ DIREITA\n");rotacao_Esq_Dir(pRaiz);//Sinais trocados
+                            printf("ROTACAO DIREITA\n");pRaiz=rotacao_Direita(pRaiz);
+                        }else{ printf("ROTACAO ESQ DIREITA pRaiz:%d\n",pRaiz->dado);pRaiz=rotacao_Esq_Dir(pRaiz);
+                        printf("AO FINAL DA ROT_ESQ_DIR pRaiz:%d\n",pRaiz->dado);}//Sinais trocados
+                        *cresceu=FALSE;
                         break;
                     case 0:
                         printf("case 0 FB=-1\n");
@@ -167,12 +200,15 @@ int inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
                         break;
                 }//Fimswitch
             }//FimIF(cresceu)
-            return TRUE;
+            return pRaiz;
         }
         else return FALSE;
     }else{
+        FolhaAVL *Direita=pRaiz->Dir;
         printf("%d comparado a raiz %d\n",numero,pRaiz->dado);
-        if(inserir(&(pRaiz)->Dir,numero,cresceu)){printf("conseguiu inserir %d cresceu:%d\n",numero,*cresceu);
+        if(pRaiz->Dir=inserir(&(pRaiz)->Dir,numero,cresceu)){printf("chamada:%d direita:%d conseguiu inserir %d cresceu:%d\n",pRaiz->dado
+                                                         ,pRaiz->Dir->dado,numero,*cresceu);
+            //if(Direita!=pRaiz->Dir){*cresceu=TRUE;}
             if(*cresceu){//inseriu a direita, agora verifica balanco
                     printf("AVALIA BALANCO DIREITA,pRaiz->dado:%d\n",pRaiz->dado);
                 switch ((pRaiz)->FatorBalanco){
@@ -185,15 +221,16 @@ int inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
                         (pRaiz)->FatorBalanco=1;*cresceu=TRUE;printf("case 0: acrescenta 1\n");
                         break;
                     case 1:
-                        if((pRaiz)->Dir->FatorBalanco==1){
-                            rotacao_Esquerda(pRaiz);printf("rodou Esquerda\n");
-                        }else rotacao_Dir_Esq(pRaiz);*cresceu=FALSE;
+                        if((pRaiz)->Dir->FatorBalanco==1){printf("case 1: vai rotacionar a esquerda");
+                            rotacao_Esquerda(&pRaiz);*cresceu=TRUE;printf("\nrodou Esquerda pRaiz.dado:%d pRaiz.FB:%d pRaiz.esq:%d pRaiz.dir:%d cresceu=%d\n"
+                                                                          ,pRaiz->dado,pRaiz->FatorBalanco,pRaiz->Esq->dado,pRaiz->Dir->dado,*cresceu);
+                        }else rotacao_Dir_Esq(&pRaiz);*cresceu=FALSE;
                         break;
                 }//FIMSWITCH
             }
-            return 1;
+            return pRaiz;
         }//FIMIF(insereDireita)
-        else return 0;// nao conseguiu inserir
+        else return FALSE;// nao conseguiu inserir
     }
 }//FimInsere
 /*
@@ -231,7 +268,7 @@ int main()
     FolhaAVL *RaizArvore,**ponteiroParaRaiz;
     RaizArvore=NULL;
     ponteiroParaRaiz=&RaizArvore;
-    int cresceu=0;
+    int aumentou=0;
     printf("RaizArvore:%x &RaizArvore:%x ponteiroParaRaiz:%x\n",RaizArvore,&RaizArvore,ponteiroParaRaiz);
 
 
@@ -240,7 +277,7 @@ int main()
         printf("interação:%d\n",i);
         valorAleatorio=rand()%100;
         //printf("inseriu valor: %d\n",valorAleatorio);
-        inserir(ponteiroParaRaiz,valorAleatorio,&cresceu);
+        inserir(ponteiroParaRaiz,valorAleatorio,&aumentou);
         printf("\nponteiroParaRaiz:%x RaizArvore:%x RaizArvore->FB:%d\n",ponteiroParaRaiz,RaizArvore,RaizArvore->FatorBalanco);
         printf("\n=============================================\n");
     }

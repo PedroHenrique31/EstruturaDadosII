@@ -64,11 +64,12 @@ typedef struct FolhaAVL{
  *      4-rotação dupla a esquerda;(operação composta de 1 e 2).
 */
 FolhaAVL* rotacao_Direita(FolhaAVL *no){
-    printf("\t\tROTACAO DIREITA\n\tno->dado:%d no->esq->dado:%d no->dir:%x",no->dado,no->Esq->dado,no->Dir);
+    //printf("\t\tROTACAO DIREITA\n\tno->dado:%d no->esq->dado:%d no->dir:%x",no->dado,no->Esq->dado,no->Dir);
+    printf("\t\tROTACAO DIREITA\n\t");
     FolhaAVL *q,*temporario;
-    temporario=no;//copia o valor de no para mexer nele
-    q=no->Esq;//q aponta para esquerda de nó
-    temporario->Esq=q->Dir;// esquerda de nó aponta para direita de q (pois o valor no>q.DIR>q)
+    temporario=no;printf("linha 70\n");//copia o valor de no para mexer nele
+    q=no->Esq;printf("linha 71:q=no->Esq:=%x\n",no->Esq);//q aponta para esquerda de nó
+    temporario->Esq=q->Dir;printf("linha 72:temporario->Esq=q->Dir\n");// esquerda de nó aponta para direita de q (pois o valor no>q.DIR>q)
     q->Dir=temporario;//direita de q aponta para no (pois valor no>q)
     q->FatorBalanco=0;//zera o FB de q
     temporario->FatorBalanco=0;//zera o fb de no
@@ -107,7 +108,9 @@ FolhaAVL* rotacao_Esq_Dir(FolhaAVL *no){
 }
 void rotacao_Dir_Esq(FolhaAVL **no){//essa função retorna void por isso devo passar um **no para trabalhar mas como nao foi chamada...
     printf("\t\t\t\t <<<< Rotação Direita Esquerda >>>>\n");
-    FolhaAVL *noAtual=*no;printf("passou a linha 110 noAtual:%d *no:%x *no->dado: tem que ser 53\n",noAtual->dado,*no);
+    FolhaAVL *noAtual=*no;printf("passou a linha 110 noAtual:%d *no:%x *no->dado:%d tem que ser 53 FB: %d\n\tno->dir: %x no->Esq:%x\n"
+                                 ,noAtual->dado,*no,(*no)->dado,
+                                 noAtual->FatorBalanco,(*no)->Dir,(*no)->Esq);
     int FatorBalancoNo=noAtual->FatorBalanco;printf("passou a linha 111 noAtual->fb:%d\n",noAtual->FatorBalanco);
     noAtual->Dir=rotacao_Direita(noAtual->Dir);printf("passou a linha 112\n");
     rotacao_Esquerda(&noAtual);printf("passou a linha 113\n");
@@ -195,7 +198,8 @@ FolhaAVL* inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
                         break;
                     case 1://direita maior
                         printf("CASE 1\n");
-                        (pRaiz)->FatorBalanco=0;printf("(pRaiz)->info:%d FatorBalanco:%d\n",(pRaiz)->dado,(pRaiz)->FatorBalanco);
+                        (pRaiz)->FatorBalanco=0;printf("(pRaiz)->info:%d FatorBalanco:%d esq:%x dir:%x\n",(pRaiz)->dado,(pRaiz)->FatorBalanco,
+                                                       (pRaiz)->Esq,(pRaiz)->Dir);
                         *cresceu=FALSE;
                         break;
                 }//Fimswitch
@@ -233,11 +237,29 @@ FolhaAVL* inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
         else return FALSE;// nao conseguiu inserir
     }
 }//FimInsere
+void insereAux(int info,FolhaAVL **pontRaiz){
+    int Aumentou=0;
+    inserir(pontRaiz,info,&Aumentou);
+    percorreCalculandoFB(*pontRaiz);
+}
+void percorreCalculandoFB(FolhaAVL *pNo){
+    if(pNo != NULL) {
+         percorreCalculandoFB(pNo->Esq);
+         calculaFatorBalanco(pNo);
+         percorreCalculandoFB(pNo->Dir);
+     }
+}
 /*
  * Existem também as famosas funções recursivas para percorrimento da arvore em diversas ordens
 */
 void visita(FolhaAVL *no){
-    printf("No: %d\n",no->dado);
+    if(no->Dir!=NULL && no->Esq!=NULL){
+        printf("No: %d No.FatorBalanco: %d No.esq: %d No.dir: %d &No: %x\n",no->dado,no->FatorBalanco,no->Esq->dado,no->Dir->dado,
+               no);
+    }else{
+        printf("No: %d &No:%x No.FatorBalanco: %d um destes é nulo No.esq:%x No.dir:%x\n",no->dado,no,no->FatorBalanco,no->Esq,no->Dir);
+    }
+    calculaFatorBalanco(no);
 }
 void emOrdem(FolhaAVL *pNo) {
      if(pNo != NULL) {
@@ -264,7 +286,7 @@ int main()
 {
     setlocale(LC_ALL,"ptb");//Traduz os caracteres para portugues.
 
-    int valorAleatorio,total=60;
+    int valorAleatorio,total=600;
     FolhaAVL *RaizArvore,**ponteiroParaRaiz;
     RaizArvore=NULL;
     ponteiroParaRaiz=&RaizArvore;
@@ -277,8 +299,11 @@ int main()
         printf("interação:%d\n",i);
         valorAleatorio=rand()%100;
         //printf("inseriu valor: %d\n",valorAleatorio);
-        inserir(ponteiroParaRaiz,valorAleatorio,&aumentou);
+        insereAux(valorAleatorio,ponteiroParaRaiz);
         printf("\nponteiroParaRaiz:%x RaizArvore:%x RaizArvore->FB:%d\n",ponteiroParaRaiz,RaizArvore,RaizArvore->FatorBalanco);
+        if(i<total){
+            emOrdem(RaizArvore);
+        }
         printf("\n=============================================\n");
     }
     emOrdem(RaizArvore);

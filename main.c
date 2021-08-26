@@ -129,15 +129,16 @@ int inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
             return 0;// erro de insercao, não tem memória.
         else
         {
-            (pRaiz)->dado=numero;printf("inserido numero:%d em pRaiz:%x\n",(pRaiz)->dado,pRaiz);
+            (pRaiz)->dado=numero;//printf("inserido numero:%d em pRaiz:%x que esta em %x\n",(pRaiz)->dado,pRaiz,&pRaiz);
             (pRaiz)->Dir=NULL;
             (pRaiz)->Esq=NULL;
             (pRaiz)->FatorBalanco=0;
+            *pPonteiroParaRaiz=pRaiz;
             *cresceu=1;
             return 1;//sucesso inserção
         }
     }else if(numero<=(pRaiz)->dado){
-        printf("numero menor \n");
+        //printf("numero menor \n");
         if(inserir(&(pRaiz)->Esq,numero,cresceu)){
             if(*cresceu){//caso tenha conseguido inserir a esquerda.
                 switch((*pRaiz).FatorBalanco){

@@ -26,26 +26,6 @@
  *
 */
 
-/**
-* Breve comentário: temos aqui uma arvore binária. Funciona e seu tempo de busca é em teoria O(log n)
-* acontece que a arvore binaria é sensível à ordem de inserção dos dados nela, podendo se desconfigurar
-* e com isso perder as vantagens de arvore logo precisamos de uma função que de tempos em tempos faça
-* o rebalanceamento da mesma, isso poderia ser evitado se tivessemos funções que balanceassem a arvore a
-* cada inserção, mantendo-a sempre nivelada.
-* Daí temos a arvore binaria de busca AVL que possui operações para tal objetivo.
-* */
-
-/**
- *          Arvore binaria AVL
- *         É um tipo de arvore binária munida de operações que a mantém balanceada na inserção e na
- *      remoção,portanto ela sobrescreve esses metodos.
- *         Para fazer isso ela utiliza 2 funções a mais que são rotaçãoDireita e rotaçãoEsquerda, além de outras
- *      2 funções que são composições dessas 2 rotaçãoDuplaDireita e rotaçãoDuplaEsquerda, além de
- *      possuir um campo a mais em seus nós que é chamado fator de balanço (FB<|1|).
- *         Essa pratica visa evitar o rebalanceamento que é deveras custoso,para fazer isso
- *      os elementos(Folhas) possuem um tipo adicional de dado chamado fator de balanço
- *      que é a diferença de altura do lado esquerdo pro direito e deve ser mantido sempre
- *      entre -1 e +1 no máximo, preferencialmente em 0 (nós com mesma altura).*/
 
 
 int main()

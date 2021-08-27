@@ -11,6 +11,12 @@
  *      que é a diferença de altura do lado esquerdo pro direito e deve ser mantido sempre
  *      entre -1 e +1 no máximo, preferencialmente em 0 (nós com mesma altura).*/
 
+#define TRUE 1
+#define FALSE 0
+
+#define DESB_ESQUERDA -1
+#define DESB_DIREITA 1
+#define BALANCEADO 0
 typedef struct FolhaAVL{
     int dado;
     int FatorBalanco;

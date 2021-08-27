@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include<locale.h>
 #include "ArvoreAVL.h"
-#define TRUE 1
-#define FALSE 0
 
-//#include "CUnit/Basic.h"
+
+#include "C:\Users\pedro\Documents\Ceub\EstruturaDados2\ArvoreBinariaBusca\ArvoreAVL\ArvoreAVL\CUnit-2.1-3\CUnit\Headers\Basic.h"
 
 /**
  *        autor: Pedro Henrique Carneiro de Araújo   Matricula: 22108287
@@ -32,7 +31,7 @@ int main()
 {
     setlocale(LC_ALL,"ptb");//Traduz os caracteres para portugues.
 
-    int valorAleatorio,total=199;
+    int valorAleatorio,total=210;
     FolhaAVL *RaizArvore,**ponteiroParaRaiz;
     RaizArvore=NULL;
     ponteiroParaRaiz=&RaizArvore;
@@ -44,6 +43,8 @@ int main()
         printf("interação:%d\n",i);
         valorAleatorio=rand()%100;
         insereAux(valorAleatorio,ponteiroParaRaiz);
+        printf("\t\t<<Foto da Árvore atual>>\n");
+        preOrdem(RaizArvore);
         printf("\n=============================================\n");
     }
     printf("\t\t\t\t<<<Percorre em ordem>>>\n");

@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include<locale.h>
+
 #include "ArvoreAVL.h"
-#define TRUE 1
-#define FALSE 0
+
 
 //#include "CUnit/Basic.h"
 
@@ -58,9 +58,12 @@ void rotacao_Esquerda(FolhaAVL **no){
 }
 FolhaAVL* rotacao_Esq_Dir(FolhaAVL *no){
     printf("\t\t\t\t <<<< ROTACAO ESQUERDA-DIREITA >>>>\n");
+
     int FatorBalancoNo=no->FatorBalanco;
-    rotacao_Esquerda(&no->Esq);
-    no=rotacao_Direita(no);
+    if(no->dado!=no->Esq->dado){
+        rotacao_Esquerda(&no->Esq);
+        no=rotacao_Direita(no);
+    }
 
     FolhaAVL *a=no->Esq,*b=no->Dir;
     switch(FatorBalancoNo){
@@ -84,12 +87,12 @@ void rotacao_Dir_Esq(FolhaAVL **no){//essa função retorna void por isso devo pas
 
     FolhaAVL *a=noAtual->Esq,*b=noAtual->Dir;
     switch(FatorBalancoNo){
-        case -1:
-            a->FatorBalanco=0;b->FatorBalanco=1;break;
-        case 0:
-            a->FatorBalanco=0;b->FatorBalanco=0;break;
-        case 1:
-            a->FatorBalanco=-1;b->FatorBalanco=0;break;
+        case DESB_ESQUERDA:
+            a->FatorBalanco=BALANCEADO;b->FatorBalanco=DESB_DIREITA;break;
+        case BALANCEADO:
+            a->FatorBalanco=BALANCEADO;b->FatorBalanco=BALANCEADO;break;
+        case DESB_DIREITA:
+            a->FatorBalanco=DESB_ESQUERDA;b->FatorBalanco=BALANCEADO;break;
     }
     //no->FatorBalanco=0;//ja iterado
     *no=noAtual;
@@ -116,7 +119,7 @@ void calculaFatorBalanco(FolhaAVL *no){
 FolhaAVL criaRegistro(int info){
     FolhaAVL novo;
     novo.dado=info;
-    novo.FatorBalanco=0;
+    novo.FatorBalanco=BALANCEADO;
     novo.Dir=NULL;
     novo.Esq=NULL;
 
@@ -137,7 +140,7 @@ FolhaAVL* inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
             (pRaiz)->dado=numero;//printf("inserido numero:%d em pRaiz:%x que esta em %x\n",(pRaiz)->dado,pRaiz,&pRaiz);
             (pRaiz)->Dir=NULL;
             (pRaiz)->Esq=NULL;
-            (pRaiz)->FatorBalanco=0;
+            (pRaiz)->FatorBalanco=BALANCEADO;
             *pPonteiroParaRaiz=pRaiz;
             *cresceu=TRUE;
             printf("inseriu na raiz:%d\n",numero);
@@ -148,26 +151,36 @@ FolhaAVL* inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
         //printf("numero menor \n");
         if(pRaiz->Esq=inserir(&(pRaiz)->Esq,numero,cresceu)){
             if(*cresceu){//caso tenha conseguido inserir a esquerda.
-                    printf("AVALIA BALANCO ESQUERDA,no->dado:%d\n",pRaiz->dado);
-                switch((*pRaiz).FatorBalanco){
-                    case -1://desbalanceado a esquerda
+                    printf("AVALIA BALANCO ESQUERDA,no->dado:%d no.FatorBalanco:%d esq:%x dir:%x\n",pRaiz->dado,
+                           pRaiz->FatorBalanco,pRaiz->Esq,pRaiz->Dir);
+                           if(pRaiz->FatorBalanco==-2||pRaiz->FatorBalanco==2){
+                                printf("\t\t FB==|2|\n");
+                                calculaFatorBalanco(pRaiz);
+                                preOrdem(pRaiz);
+                           }
 
-                        if((pRaiz)->Esq->FatorBalanco==-1){
+                           /*if(pRaiz->Esq!=NULL){printf("pRaiz->Esq:%d\n",pRaiz->Esq->dado);
+                                if(pRaiz->Dir!=NULL){printf("pRaiz->Dir:%d\n",pRaiz->Dir->dado);}
+                           }*/
+                switch((*pRaiz).FatorBalanco){
+                    case DESB_ESQUERDA://desbalanceado a esquerda
+
+                        if((pRaiz)->Esq->FatorBalanco==DESB_ESQUERDA){
                             pRaiz=rotacao_Direita(pRaiz);
                         }else{pRaiz=rotacao_Esq_Dir(pRaiz);}//Sinais trocados
                         *cresceu=FALSE;
                         break;
-                    case 0:
-                        (pRaiz)->FatorBalanco=-1;
-                        *cresceu=TRUE;
+                    case BALANCEADO:
+                        (pRaiz)->FatorBalanco=DESB_ESQUERDA;*cresceu=TRUE;
                         break;
-                    case 1://direita maior
+                    case DESB_DIREITA://direita maior
 
-                        (pRaiz)->FatorBalanco=0;
+                        (pRaiz)->FatorBalanco=BALANCEADO;
                         *cresceu=FALSE;
                         break;
                 }//Fimswitch
             }//FimIF(cresceu)
+
             return pRaiz;
         }
         else return FALSE;
@@ -178,20 +191,21 @@ FolhaAVL* inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
             if(*cresceu){//inseriu a direita, agora verifica balanco
                     printf("AVALIA BALANCO DIREITA,pRaiz->dado:%d\n",pRaiz->dado);
                 switch ((pRaiz)->FatorBalanco){
-                    case -1:
-                        (pRaiz)->FatorBalanco=0;
+                    case DESB_ESQUERDA:
+                        (pRaiz)->FatorBalanco=BALANCEADO;
                         *cresceu=FALSE;
                         break;
-                    case 0:
-                        (pRaiz)->FatorBalanco=1;*cresceu=TRUE;
+                    case BALANCEADO:
+                        (pRaiz)->FatorBalanco=DESB_DIREITA;*cresceu=TRUE;
                         break;
-                    case 1:
-                        if((pRaiz)->Dir->FatorBalanco==1){
+                    case DESB_DIREITA:
+                        if((pRaiz)->Dir->FatorBalanco==DESB_DIREITA){
                             rotacao_Esquerda(&pRaiz);*cresceu=TRUE;
                         }else rotacao_Dir_Esq(&pRaiz);*cresceu=FALSE;
                         break;
                 }//FIMSWITCH
             }
+
             return pRaiz;
         }//FIMIF(insereDireita)
         else return FALSE;// nao conseguiu inserir
@@ -209,15 +223,29 @@ void percorreCalculandoFB(FolhaAVL *pNo){
          percorreCalculandoFB(pNo->Dir);
      }
 }
+void rebalanceia(FolhaAVL *arv){
+    switch(arv->FatorBalanco){
+    case DESB_ESQUERDA:
+        if(arv->Esq->FatorBalanco==DESB_ESQUERDA){pRaiz=rotacao_Direita(pRaiz);}else{pRaiz=rotacao_Esq_Dir(pRaiz);}
+        //if(ALGUMACOISA_POISFOI_INSERCAO_ESQUERDA){arv->FatorBalanco=BALANCEADO;*cresceu=FALSE;}
+        break;
+    case BALANCEADO:
+        if(FOI_INSERCAO_A_ESQUERDA){pRaiz)->FatorBalanco=DESB_ESQUERDA;*cresceu=TRUE;}
+        if(FOI_INSERCAO_A_DIREITA){(pRaiz)->FatorBalanco=DESB_DIREITA;*cresceu=TRUE;}
+        break;
+    case DESB_DIREITA:
+
+    }
+}
 /*
  * Existem também as famosas funções recursivas para percorrimento da arvore em diversas ordens
 */
 void visita(FolhaAVL *no){
     if(no->Dir!=NULL && no->Esq!=NULL){
-        printf("No: %d No.FatorBalanco: %d No.esq: %d No.dir: %d &No: %x\n",no->dado,no->FatorBalanco,no->Esq->dado,no->Dir->dado,
+        printf("No: %d <No.FatorBalanco: %d > No.esq: %d No.dir: %d &No: %x\n",no->dado,no->FatorBalanco,no->Esq->dado,no->Dir->dado,
                no);
     }else{
-        printf("No: %d &No:%x No.FatorBalanco: %d um destes é nulo No.esq:%x No.dir:%x\n",no->dado,no,no->FatorBalanco,no->Esq,no->Dir);
+        printf("No: %d <No.FatorBalanco: %d > um destes é nulo (esq:%x dir:%x) &No:%x\n",no->dado,no->FatorBalanco,no->Esq,no->Dir,no);
     }
     calculaFatorBalanco(no);
 }

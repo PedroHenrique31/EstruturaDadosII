@@ -3,7 +3,7 @@
 #include<locale.h>
 
 #include "ArvoreAVL.h"
-
+//estancia V modulo 11 casa 19A,brasília;61 9 91663668;052.167.131-56
 
 //#include "CUnit/Basic.h"
 
@@ -35,8 +35,8 @@ FolhaAVL* rotacao_Direita(FolhaAVL *no){
     else{temporario->Esq=q->Dir;}// esquerda de nó aponta para direita de q (pois o valor no>q.DIR>q)
     if(q!=NULL){
         q->Dir=temporario;//direita de q aponta para no (pois valor no>q)
-        q->FatorBalanco=0;//zera o FB de q
-        temporario->FatorBalanco=0;//zera o fb de no
+        q->FatorBalanco=BALANCEADO;//zera o FB de q
+        temporario->FatorBalanco=BALANCEADO;//zera o fb de no
         no=q;//troca no de lugar para q
         printf("no=%x\n",no);
     }else{
@@ -52,8 +52,8 @@ void rotacao_Esquerda(FolhaAVL **no){
     b=a->Dir;//b aponta para direita de no (logo valor b>no)
     a->Dir=b->Esq;//no aponta para esquerda de b (pois valor b->esq<b>no)
     b->Esq=a;//esquerda de b aponta no (pois b->esq<b>no)
-    a->FatorBalanco=0;
-    b->FatorBalanco=0;
+    a->FatorBalanco=BALANCEADO;
+    b->FatorBalanco=BALANCEADO;
     *no=b;//troca no de lugar para b
 }
 FolhaAVL* rotacao_Esq_Dir(FolhaAVL *no){
@@ -67,12 +67,12 @@ FolhaAVL* rotacao_Esq_Dir(FolhaAVL *no){
 
     FolhaAVL *a=no->Esq,*b=no->Dir;
     switch(FatorBalancoNo){
-        case -1:
-            a->FatorBalanco=0;b->FatorBalanco=1;break;
-        case 0:
-            a->FatorBalanco=0;b->FatorBalanco=0;break;
-        case 1:
-            a->FatorBalanco=-1;b->FatorBalanco=0;break;
+        case DESB_ESQUERDA:
+            a->FatorBalanco=BALANCEADO;b->FatorBalanco=DESB_DIREITA;break;
+        case BALANCEADO:
+            a->FatorBalanco=BALANCEADO;b->FatorBalanco=BALANCEADO;break;
+        case DESB_DIREITA:
+            a->FatorBalanco=DESB_ESQUERDA;b->FatorBalanco=BALANCEADO;break;
     }
     //no->FatorBalanco=0;//ja foi iterado
     printf("no->FB antes:%d depois:%d\n\tno.esq.dado:%d no.esq.fatorbalanço:%d\n",no->FatorBalanco,FatorBalancoNo,no->Esq->dado,no->Esq->FatorBalanco);
@@ -130,7 +130,7 @@ FolhaAVL criaRegistro(int info){
 FolhaAVL* inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
     FolhaAVL *pRaiz=*pPonteiroParaRaiz;
 
-    if(pRaiz==NULL)
+    if(pRaiz==NULL)//ARVORE VAZIA
     {
         pRaiz=(FolhaAVL *)malloc(sizeof(FolhaAVL));
         if(pRaiz==NULL)
@@ -146,7 +146,9 @@ FolhaAVL* inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
             printf("inseriu na raiz:%d\n",numero);
             return pRaiz;//sucesso inserção
         }
-    }else if(numero<=(pRaiz)->dado){
+    }else //if(numero==(pRaiz)->dado){return 0;}
+
+    if(numero<(pRaiz)->dado){
 
         //printf("numero menor \n");
         if(pRaiz->Esq=inserir(&(pRaiz)->Esq,numero,cresceu)){
@@ -182,9 +184,9 @@ FolhaAVL* inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
             }//FimIF(cresceu)
 
             return pRaiz;
-        }
+        }//TERMINA DE INSERIR MENOR
         else return FALSE;
-    }else{
+    }else{//SE MAIOR
         FolhaAVL *Direita=pRaiz->Dir;
 
         if(pRaiz->Dir=inserir(&(pRaiz)->Dir,numero,cresceu)){
@@ -209,12 +211,13 @@ FolhaAVL* inserir(FolhaAVL **pPonteiroParaRaiz,int numero,int *cresceu){
             return pRaiz;
         }//FIMIF(insereDireita)
         else return FALSE;// nao conseguiu inserir
-    }
+    }//FIM INSERE MAIOR
 }//FimInsere
 void insereAux(int info,FolhaAVL **pontRaiz){
     int Aumentou=0;
     inserir(pontRaiz,info,&Aumentou);
-    percorreCalculandoFB(*pontRaiz);
+    emOrdem(*pontRaiz);
+    //percorreCalculandoFB(*pontRaiz);
 }
 void percorreCalculandoFB(FolhaAVL *pNo){
     if(pNo != NULL) {
@@ -223,6 +226,7 @@ void percorreCalculandoFB(FolhaAVL *pNo){
          percorreCalculandoFB(pNo->Dir);
      }
 }
+/*
 void rebalanceia(FolhaAVL *arv){
     switch(arv->FatorBalanco){
     case DESB_ESQUERDA:
@@ -237,6 +241,7 @@ void rebalanceia(FolhaAVL *arv){
 
     }
 }
+*/
 /*
  * Existem também as famosas funções recursivas para percorrimento da arvore em diversas ordens
 */

@@ -4,7 +4,7 @@
 #include "ArvoreAVL.h"
 
 
-#include "C:\Users\pedro\Documents\Ceub\EstruturaDados2\ArvoreBinariaBusca\ArvoreAVL\ArvoreAVL\CUnit-2.1-3\CUnit\Headers\Basic.h"
+//#include "C:\Users\pedro\Documents\Ceub\EstruturaDados2\ArvoreBinariaBusca\ArvoreAVL\ArvoreAVL\CUnit-2.1-3\CUnit\Headers\Basic.h"
 
 /**
  *        autor: Pedro Henrique Carneiro de Araújo   Matricula: 22108287
@@ -44,7 +44,7 @@ int main()
         valorAleatorio=rand()%100;
         insereAux(valorAleatorio,ponteiroParaRaiz);
         printf("\t\t<<Foto da Árvore atual>>\n");
-        preOrdem(RaizArvore);
+        //preOrdem(RaizArvore);
         printf("\n=============================================\n");
     }
     printf("\t\t\t\t<<<Percorre em ordem>>>\n");

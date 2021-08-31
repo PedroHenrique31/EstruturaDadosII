@@ -35,7 +35,7 @@ int main()
     FolhaAVL *RaizArvore,**ponteiroParaRaiz;
     RaizArvore=NULL;
     ponteiroParaRaiz=&RaizArvore;
-    int aumentou=0;
+    int aumentou=0,valRemover;
 
 
 
@@ -46,6 +46,12 @@ int main()
         printf("\t\t<<Foto da Árvore atual>>\n");
         //preOrdem(RaizArvore);
         printf("\n=============================================\n");
+
+    }
+    printf("\t\t\t Removendo\n");
+    scanf("%d",&valRemover);
+    if(removeAVL(RaizArvore,valRemover,&aumentou)){
+            printf("removeu numero %d\n",valRemover);
     }
     printf("\t\t\t\t<<<Percorre em ordem>>>\n");
     emOrdem(RaizArvore);

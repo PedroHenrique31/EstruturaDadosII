@@ -17,6 +17,7 @@
 #define DESB_ESQUERDA -1
 #define DESB_DIREITA 1
 #define BALANCEADO 0
+
 typedef struct FolhaAVL{
     int dado;
     int FatorBalanco;
@@ -39,3 +40,4 @@ void visita(FolhaAVL *no);
 void emOrdem(FolhaAVL *pNo);
 void preOrdem(FolhaAVL *pNo);
 void posOrdem(FolhaAVL *pNo);
+int removeAVL(FolhaAVL *noRaiz,int valRemover,int *mudouAltura);

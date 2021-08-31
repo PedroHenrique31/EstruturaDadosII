@@ -3,7 +3,9 @@
 #include<locale.h>
 
 #include "ArvoreAVL.h"
-//estancia V modulo 11 casa 19A,brasília;61 9 91663668;052.167.131-56
+
+#define LimEsq -2
+#define LimDir 2
 
 //#include "CUnit/Basic.h"
 
@@ -275,3 +277,85 @@ void emOrdem(FolhaAVL *pNo) {
          visita(pNo);
      }
  }
+
+ FolhaAVL* predecessor(FolhaAVL *no){
+    no=no->Esq;
+    while(no->Dir!=NULL){
+        no=no->Dir;
+    }
+    return no;
+}
+
+ int removeAVL(FolhaAVL *noRaiz,int valRemover,int *mudouAltura){
+    FolhaAVL *noAux;//ponteiro auxiliarpara nó
+    //printf("entrou na função linha 291\n");
+    if(noRaiz==NULL){
+        //caso a arvore esteja vazia
+        return FALSE;printf("será que entrou aqui?\n");
+    }else{
+        //caso valor seja menor que o dado vai pra esquerda
+        if(valRemover<noRaiz->dado){
+                printf("valRemover < noRaiz->dado,linha 298\n");
+            if(removeAVL(noRaiz->Esq,valRemover,mudouAltura)){
+                if(*mudouAltura)
+                {
+                    noRaiz->FatorBalanco++;
+                    switch(noRaiz->FatorBalanco){
+                        case LimDir:rotacao_Esquerda(&noRaiz);if(noRaiz->FatorBalanco==DESB_DIREITA){*mudouAltura=FALSE;printf("Foi pra esquerda\n");}
+                        break;
+                        case DESB_DIREITA:*mudouAltura=FALSE;break;
+                    }//FIMCASES
+                    return TRUE;//Conseguiu remover e finaliza função
+                }
+                //SE nao mudou altura faz o que???
+            }
+        }else{//valRemover > noRaiz->dado ou valRemover==noRaiz->dado
+            if(valRemover > noRaiz->dado){
+                    printf("valRemover > noRaiz->dado,linha 313\n");
+                if(removeAVL(noRaiz->Dir,valRemover,mudouAltura)){
+                    noRaiz->FatorBalanco--;
+                    switch(noRaiz->FatorBalanco){
+                        case LimEsq:noRaiz=rotacao_Direita(noRaiz);if(noRaiz->FatorBalanco=DESB_ESQUERDA){*mudouAltura=FALSE;};break;
+                        case DESB_ESQUERDA:*mudouAltura=FALSE;break;
+                    }//avalia balanceamento da arvore
+                    return TRUE;//finaliza remocao a direita
+                }//conseguiu remover algo a esquerda
+            }//valRemove dado
+            else{
+                //caso valRemove==noRaiz->dado
+                if(noRaiz->dado==valRemover)
+                {
+                    printf("valRemover == noRaiz->dado,linha 328\n");
+                    if(noRaiz->Esq==NULL && noRaiz->Dir==NULL)
+                    {
+                        free(noRaiz);printf("removeu no,linha 331\n");
+                        noRaiz=NULL;
+                        *mudouAltura=TRUE;
+                    }//caso no nao tenha filhos
+                }//caso valRemove seja igual a dado
+                else if(noRaiz->Esq!=NULL || noRaiz->Dir!=NULL){//caso nó não possui filhos
+                    printf("nó não possui filhos\n");
+                    noAux=predecessor(noRaiz);//pega o predecessor de noRaiz
+                    noRaiz->dado=noAux->dado;
+                    removeAVL(noRaiz->Esq,noRaiz->dado,mudouAltura);//promove o nó e remove a esquerda
+                }//Fim caso um dos nós nao seja vazio
+                else if(noRaiz->Esq!=NULL){//caso nó possui sub-árvore a esquerda:repassa esquerda para o pai
+                    printf("nó possui filho a esquerda\n");
+                    noRaiz->dado=noRaiz->Esq->dado;
+                    free(noRaiz->Esq);
+                    noRaiz->Esq=NULL;
+                }// Fim caso arvore a esquerda nao seja nula
+                else{// caso nó possui sub-árvore direita: atribui ao pai
+                    printf("nó possui filho a direita\n");
+                    noRaiz->dado=noRaiz->Dir->dado;
+                    free(noRaiz->Dir);
+                    noRaiz->Dir=NULL;
+                }// Fim
+                *mudouAltura=TRUE;
+            }//Fim caso encontre valRemove na arvore
+            *mudouAltura=TRUE;
+        }// Fim caso valRemover seja menor ou igual noRaiz->dado
+    }//Fim Arvore não-vazia
+    *mudouAltura=FALSE;
+ }
+
